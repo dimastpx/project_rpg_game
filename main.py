@@ -2,6 +2,7 @@ from random import randint, choice
 
 Location = ["Дикий лес", "Подземелье", "Снежные горы", "Деревня", "Луга"]
 Items = ["Граната", "Динамит", "Лекарства", "Лечебное зелье", "Мясо", "Лунный камень"]
+Enemies = ["Давид", "Гоблин", "Гоблин", "Гоблин", "Волк", "Фенрир", "Иван", "Колдун"]
 
 class Player:
     def __init__(self):
@@ -50,13 +51,26 @@ class Player:
             case "нашли сундук":
                 print("Случайный сундук перед вами")
                 if self.level < 5:
-                    count = randint(1, 3)
+                    count = randint(1, 2)
                 else:
-                    count = randint(2, 4)
+                    count = randint(2, 3)
 
                 loot = []
+
+                print("Вы видите в сундуке следующие предметы:")
+
                 for _ in range(count):
-                    loot.append(choice(Items))
+                    item = choice(Items)
+                    loot.append(item)
+                    print(item)
+
+                print("Вы залутали сундук")
+                self.items.append(*loot)
+
+            case "встретили врага":
+
+
+
 
 
 player = Player()
