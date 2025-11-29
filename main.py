@@ -1,7 +1,7 @@
 from random import randint, choice
 
 Location = ("Дикий лес", "Подземелье", "Снежные горы", "Деревня", "Луга")
-Items = ("Граната", "Динамит", "Лекарства", "Лечебное зелье", "Мясо", "Лунный камень", "Зелье огнестойкости",
+Items = ("Граната", "Динамит", "Лекарства", "Лечебное зелье", "Мясо", "Лунный камень",
          "Зелье урона", "Щит")
 
 
@@ -16,7 +16,7 @@ Enemies_5_lvl = ("Староста Давид", "Фенрир")
 class Player:
     def __init__(self):
         self.enemy = None
-        self.name = input("Введите ваше имя: ")
+        self.name = input("Введите ваше имя: ").capitalize()
         player_choice = False
         self.xp = 0
         self.level = 1
@@ -50,8 +50,10 @@ class Player:
               f"Предметы: {self.items}\n"
               f"Эффекты: {self.effects}")
 
-    # Функция, чтоб гулять
     def walk(self):
+
+        print("="*100)
+
         location = choice(Location)
         location_type = choice(("нашли сундук", "встретили врага", "встретили врага", "встретили врага",
                        "увидели, что всё спокойно"))
@@ -116,31 +118,37 @@ class Player:
                 print()
                 print("Вы отдохнули и восстановили здоровье")
                 self.health = self.max_health
+                input("Нажмите enter чтобы продолжить")
 
                 self.walk()
 
 
 
     def battle(self):
+        print("-" * 50 + "Враг" + "-" * 50)
 
-        print("|"+ self.enemy.name + "|")
+        print("|" + self.enemy.name + "|")
         print(f"Здоровье: {self.enemy.health}")
         print(f"Атака:  {self.enemy.damage}")
         print(f"Защита: {self.enemy.armor}%")
         print("-"*10)
+        print("|" + self.name + "|")
         print(f"Ваше здоровье: {self.health}")
         print(f"Ваша атака: {self.get_damage(self.enemy)[0]}")
-        print(f"Ваша броня: {self.armor}%")
-        print(f"Ваш уровень: {self.level}")
-        print(f"Ваш опыт: {self.xp}")
+
         damage = self.get_damage(self.enemy)[1]
-
         if len(damage) > 0:
-
             print("Бонусы к атаке: ",*damage)
+
         print(f"Ваша защита: {self.armor}%")
+        print(f"Шанс уклонения: {self.avoidance}")
+        print()
+        print(f"Ваш уровень: {self.level}  {bar_level(self.level)}")
+        print(f"Ваш опыт: {self.xp} {bar_xp(self.xp, self.level * 100)}")
 
 
+
+        print()
         print("Ваши действия:")
         print("1 - Атака")
         print("2 - Использовать предмет")
@@ -158,7 +166,7 @@ class Player:
                 case 2:
                     self.use_item()
                 case 3:
-                    self.avoid()
+                    self.avoid(self.enemy)
                 case _:
                     print("Неизвестный выбор")
                     self.battle()
@@ -167,8 +175,10 @@ class Player:
     def attack(self, enemy):
         armor = 1 - (enemy.armor / 100)
         enemy.health -= self.get_damage(enemy)[0] * armor
+        self.temp_effects = []
 
         if enemy.health <= 0:
+            print("-" * 50 + "Победа" + "-" * 50)
             print("Вы победили!")
 
             self.xp += enemy.xp
@@ -183,78 +193,108 @@ class Player:
 
             self.walk()
         else:
-            damage = enemy.get_damage(self)
-            self.health -= damage
-            self.battle()
+            armor = 1 - (enemy.armor / 100)
+            self.health -= enemy.damage * armor
+
+            if self.health <= 0:
+                self.death()
+            else:
+                self.battle()
 
 
 
     def use_item(self):
-        for i, item in enumerate(self.items):
-            print(i + 1, item)
+        print("-" * 50 + "Использование" + "-" * 50)
+
+        if len(self.items) == 0:
+            print("У вас нет предметов")
+        else:
+            for i, item in enumerate(self.items):
+                print(i + 1, item)
 
 
-        player_choice = False
-        while not player_choice:
-            try:
-                player_choice = int(input("Выберите действие"))
-            except ValueError:
-                print("Ошибка, вы ввели не число")
+            player_choice = False
+            while not player_choice:
+                try:
+                    player_choice = int(input("Выберите действие"))
+                except ValueError:
+                    print("Ошибка, вы ввели не число")
 
-            if player_choice == 0:
-                self.battle()
-            else:
-                is_werewolf = "Оборотень" in self.effects
-                item = self.items[player_choice - 1]
+                if player_choice == 0:
+                    break
 
-                match item:
-                    case "Граната"| "Динамит"| "Зелье урона":
-                        if is_werewolf:
-                            print(f"Оборотни не умеют пользоваться предметами, вы теряете {item}")
-                        else:
-                            print(f"Вы использовали {item}")
-                            self.temp_effects.append(item)
-                        self.items.remove(item)
+                else:
+                    is_werewolf = "Оборотень" in self.effects
+                    item = self.items[player_choice - 1]
 
-                    case "Лекарства":
-                        if is_werewolf:
-                            print(f"Оборотням нельзя питаться человеческими лекарствами")
-                        else:
-                            print("Вы подлечились")
-                            self.health += 20
+                    match item:
+                        case "Граната"| "Динамит"| "Зелье урона":
+                            if is_werewolf:
+                                print(f"Оборотни не умеют пользоваться предметами, вы теряете {item}")
+                            else:
+                                print(f"Вы использовали {item}")
+                                self.temp_effects.append(item)
+                            self.items.remove(item)
 
-                    case "Лечебное зелье":
-                        if is_werewolf:
-                            print(f"Оборотни не умеют пить из бутылок")
-                        else:
-                            print("Вы подлечились")
-                            self.health += 50
+                        case "Лекарства":
+                            if is_werewolf:
+                                print(f"Оборотням нельзя питаться человеческими лекарствами")
+                            else:
+                                print("Вы подлечились")
+                                self.health += 20
 
-                    case "Мясо":
-                        self.temp_effects.append("Мясо")
-                        self.items.remove(self.items[player_choice - 1])
-                        if is_werewolf:
-                            self.health += 50
-                            print("Вы съели мясо, ррррр")
-                        else:
-                            self.health += 30
-                            print("Вы съели мясо")
-                    case "Лунный камень":
-                        if is_werewolf:
-                            self.effects.remove("Оборотень")
-                            print("Вы превратились в человека")
-                        else:
-                            print("Вы превратились в оборотня")
-                            self.effects.append("Оборотень")
-                    case "Щит":
-                        self.temp_effects.append("Щит")
+                        case "Лечебное зелье":
+                            if is_werewolf:
+                                print(f"Оборотни не умеют пить из бутылок")
+                            else:
+                                print("Вы подлечились")
+                                self.health += 50
+
+                        case "Мясо":
+                            self.temp_effects.append("Мясо")
+                            self.items.remove(self.items[player_choice - 1])
+                            if is_werewolf:
+                                self.health += 50
+                                print("Вы съели мясо, ррррр")
+                            else:
+                                self.health += 30
+                                print("Вы съели мясо")
+                        case "Лунный камень":
+                            if is_werewolf:
+                                self.effects.remove("Оборотень")
+                                print("Вы превратились в человека")
+                            else:
+                                self.effects.append("Оборотень")
+                                print("Вы превратились в оборотня")
+                        case "Щит":
+                            if is_werewolf:
+                                print("Вы не можете использовать этот предмет будучи оборотнем")
+                            else:
+                                self.armor += 5
+                                print("Вы прибавили 5% к своей защите")
         print()
         print()
         self.battle()
 
 
-    def avoid(self):
-        pass
+    def avoid(self, enemy):
+        print("-" * 50 + "Уворот" + "-" * 50)
+        chance = randint(0, 100)
+        if chance < self.avoidance:
+            print("Вы успешно увернулись от атаки и восстановили 10 здоровья")
+            self.health += 10
+            self.battle()
+        else:
+            print("Вы не смогли увернуться от атаки")
+            armor = 1 - (enemy.armor / 100)
+            self.health -= enemy.damage * armor
+            print(f"Вы потеряли {enemy.damage * armor} здоровья")
+            if self.health <= 0:
+                self.death()
+            else:
+                self.battle()
+
+
 
     def get_damage(self, enemy) -> (int, list):
         descriptions = []
@@ -288,6 +328,13 @@ class Player:
 
 
         return damage, descriptions
+
+    def death(self):
+        print("-" * 50 + "Смерть" + "-" * 50)
+        print(f"{self.enemy.name} уничтожил вас")
+        print("Игра окончена")
+
+        input("Нажмите enter чтобы закончить игру")
 
 
 
@@ -339,15 +386,25 @@ class Enemy:
                 self.xp = 150
                 self.effects = []
 
-    def get_damage(self, player) -> int:
-        damage = self.damage
-        for effect in player.effects:
-            match effect:
-                case "Щит":
+def bar_level(level: int) -> str:
+    match level:
+        case 1:
+            return "|=----|"
+        case 2:
+            return "|==---|"
+        case 3:
+            return "|===--|"
+        case 4:
+            return "|====-|"
+        case 5:
+            return "|=====|"
+    return ""
 
 
-        return 0
-
+def bar_xp(xp: int, max_xp: int) -> str:
+    k = round((xp / max_xp) * 10)
+    s = "=" * k + "-" * (10 - k)
+    return "|" + s + "|"
 
 
 player = Player()
