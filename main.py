@@ -209,7 +209,7 @@ class Player:
                 max_xp = self.level * 100
                 print(f"Опыт +{enemy.xp}")
 
-                if self.xp > max_xp:
+                if self.xp >= max_xp:
                     self.xp = 0
                     self.level += 1
                     print(f"Новый {self.level} уровень!")
@@ -320,7 +320,7 @@ class Player:
             self.battle()
         else:
             print("Вы не смогли увернуться от атаки")
-            armor = 1 - (enemy.armor / 100)
+            armor = 1 - (self.armor / 100)
             self.health -= enemy.damage * armor
             print(f"Вы потеряли {enemy.damage * armor} здоровья")
             if self.health <= 0:
