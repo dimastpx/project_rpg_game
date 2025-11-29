@@ -174,8 +174,11 @@ class Player:
 
     def attack(self, enemy):
         armor = 1 - (enemy.armor / 100)
-        enemy.health -= self.get_damage(enemy)[0] * armor
+        damage =  self.get_damage(enemy)[0] * armor
+        enemy.health -= damage
         self.temp_effects = []
+        print("-" * 50 + "Атака" + "-" * 50)
+        print(f"Вы нанесли врагу {damage} урона")
 
         if enemy.health <= 0:
             print("-" * 50 + "Победа" + "-" * 50)
@@ -193,8 +196,10 @@ class Player:
 
             self.walk()
         else:
-            armor = 1 - (enemy.armor / 100)
-            self.health -= enemy.damage * armor
+            armor = 1 - (self.armor / 100)
+            enemy_damage = enemy.damage * armor
+            self.health -= enemy_damage
+            print(f"{enemy.name} нанёс вам {enemy_damage} урона")
 
             if self.health <= 0:
                 self.death()
