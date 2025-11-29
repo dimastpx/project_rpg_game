@@ -1,15 +1,15 @@
 from random import randint, choice
 
-Location = ("Дикий лес", "Подземелье", "Снежные горы", "Деревня", "Луга")
-Items = ("Граната", "Динамит", "Лекарства", "Лечебное зелье", "Мясо", "Лунный камень",
+LOCATIONS = ("Дикий лес", "Подземелье", "Снежные горы", "Деревня", "Луга")
+ITEMS = ("Граната", "Динамит", "Лекарства", "Лечебное зелье", "Мясо", "Лунный камень",
          "Зелье урона", "Щит")
 
 
-Enemies_1_lvl = ("Гоблин", "Волк", "Дикий кабан")
-Enemies_2_lvl = ("Скелет", "Зомби", "Бандит")
-Enemies_3_lvl = ("Голем", "Лавовый слизень")
-Enemies_4_lvl = ("Колдун", "Адская гончая")
-Enemies_5_lvl = ("Староста Давид", "Фенрир")
+ENEMIES_1_LVL = ("Гоблин", "Волк", "Дикий кабан")
+ENEMIES_2_LVL = ("Скелет", "Зомби", "Бандит")
+ENEMIES_3_LVL = ("Голем", "Лавовый слизень")
+ENEMIES_4_LVL = ("Колдун", "Адская гончая")
+ENEMIES_5_LVL = ("Староста Давид", "Фенрир")
 
 
 
@@ -29,7 +29,7 @@ class Player:
             self.health = randint(90, 110)
             self.damage = randint(30,60)
             self.armor = randint(10, 20)
-            self.avoidance = randint(10, 30)
+            self.avoidance = randint(30, 55)
 
             self.show_status()
             if input("1 - оставить характеристики\n"
@@ -54,7 +54,7 @@ class Player:
 
         print("="*100)
 
-        location = choice(Location)
+        location = choice(LOCATIONS)
         location_type = choice(("нашли сундук", "нашли сундук",
                                 "встретили врага", "встретили врага", "встретили врага",
                                 "увидели, что всё спокойно", "увидели, что всё спокойно"))
@@ -66,18 +66,18 @@ class Player:
                 print("Случайный сундук перед вами")
 
                 if self.level < 2:
-                    count = randint(2, 3)
+                    count = randint(1, 2)
                 elif self.level < 4:
-                    count = randint(3, 4)
+                    count = randint(2, 3)
                 else:
-                    count = 4
+                    count = randint(3, 4)
 
                 loot = []
 
                 print("Вы видите в сундуке следующие предметы:")
 
                 for _ in range(count):
-                    item = choice(Items)
+                    item = choice(ITEMS)
                     loot.append(item)
                     print("-> " + item)
 
@@ -99,16 +99,16 @@ class Player:
 
                 match self.level:
                     case 1:
-                        enemy_name = choice(Enemies_1_lvl)
+                        enemy_name = choice(ENEMIES_1_LVL)
                     case 2:
-                        enemy_name = choice((choice(Enemies_1_lvl), choice(Enemies_2_lvl)))
+                        enemy_name = choice((choice(ENEMIES_1_LVL), choice(ENEMIES_2_LVL)))
                     case 3:
-                        enemy_name = choice((choice(Enemies_3_lvl), choice(Enemies_2_lvl), choice(Enemies_1_lvl)))
+                        enemy_name = choice((choice(ENEMIES_3_LVL), choice(ENEMIES_2_LVL), choice(ENEMIES_1_LVL)))
                     case 4:
-                        enemy_name = choice((choice(Enemies_4_lvl), choice(Enemies_3_lvl), choice(Enemies_2_lvl),
-                                             choice(Enemies_1_lvl)))
+                        enemy_name = choice((choice(ENEMIES_4_LVL), choice(ENEMIES_3_LVL), choice(ENEMIES_2_LVL),
+                                             choice(ENEMIES_1_LVL)))
                     case 5:
-                        enemy_name = choice(Enemies_5_lvl)
+                        enemy_name = choice(ENEMIES_5_LVL)
                     case _:
                         enemy_name = "Если ты это видишь то что то не так"
 
@@ -160,22 +160,21 @@ class Player:
         print("2 - Использовать предмет")
         print("3 - Увернуться")
 
-        player_choice = False
-        while not player_choice:
-            try:
-                player_choice = int(input("Выберите действие"))
-            except ValueError:
-                print("Ошибка, вы ввели не число")
-            match player_choice:
-                case 1:
-                    self.attack(self.enemy)
-                case 2:
-                    self.use_item()
-                case 3:
-                    self.avoid(self.enemy)
-                case _:
-                    print("Неизвестный выбор")
-                    self.battle()
+        player_choice = None
+        try:
+            player_choice = int(input("Выберите действие: "))
+        except ValueError:
+            print("Ошибка, вы ввели не число")
+        match player_choice:
+            case 1:
+                self.attack(self.enemy)
+            case 2:
+                self.use_item()
+            case 3:
+                self.avoid(self.enemy)
+            case _:
+                print("Неизвестный выбор")
+                self.battle()
 
 
     def attack(self, enemy):
@@ -190,24 +189,27 @@ class Player:
             print("-" * 50 + "Победа" + "-" * 50)
             print("Вы победили!")
 
-            self.health += 30
-            if self.health <= self.max_health:
-                print("Вы восстановили 30 здоровья")
+            if enemy.name in ("Староста Давид", "Фенрир"):
+                self.victory()
             else:
-                print("Вы восстановили здоровье до предела")
-                self.health = self.max_health
+                self.health += 30
+                if self.health <= self.max_health:
+                    print("Вы восстановили 30 здоровья")
+                else:
+                    print("Вы восстановили здоровье до предела")
+                    self.health = self.max_health
 
-            self.xp += enemy.xp
-            max_xp = self.level * 100
-            print(f"Опыт +{enemy.xp}")
+                self.xp += enemy.xp
+                max_xp = self.level * 100
+                print(f"Опыт +{enemy.xp}")
 
-            if self.xp > max_xp:
-                self.xp = 0
-                self.level += 1
-                print(f"Новый {self.level} уровень!")
+                if self.xp > max_xp:
+                    self.xp = 0
+                    self.level += 1
+                    print(f"Новый {self.level} уровень!")
 
 
-            self.walk()
+                self.walk()
         else:
             armor = 1 - (self.armor / 100)
             enemy_damage = enemy.damage * armor
@@ -234,7 +236,7 @@ class Player:
             player_choice = False
             while not player_choice:
                 try:
-                    player_choice = int(input("Выберите действие"))
+                    player_choice = int(input("Выберите действие: "))
                 except ValueError:
                     print("Ошибка, вы ввели не число")
 
@@ -243,7 +245,12 @@ class Player:
 
                 else:
                     is_werewolf = "Оборотень" in self.effects
-                    item = self.items[player_choice - 1]
+                    try:
+                        item = self.items[player_choice - 1]
+                    except IndexError:
+                        print("Предмет с таким номером не найден")
+                        continue
+
                     print()
 
                     match item:
@@ -276,10 +283,10 @@ class Player:
                             self.items.remove(self.items[player_choice - 1])
                             if is_werewolf:
                                 self.health += 50
-                                print("Вы съели мясо, ррррр")
+                                print("Вы съели мясо, ррррр (+50 здоровья оборотню)")
                             else:
                                 self.health += 30
-                                print("Вы съели мясо")
+                                print("Вы съели мясо (+30 здоровья)")
                         case "Лунный камень":
                             if is_werewolf:
                                 self.effects.remove("Оборотень")
@@ -295,13 +302,12 @@ class Player:
                                 print("Вы прибавили 5% к своей защите")
                             self.items.remove(item)
         print()
-        print()
         self.battle()
 
 
     def avoid(self, enemy):
         print("-" * 50 + "Уворот" + "-" * 50)
-        chance = randint(0, 100)
+        chance = randint(1, 100)
         if chance < self.avoidance:
             print("Вы успешно увернулись от атаки и восстановили 20 здоровья")
             self.health += 20
@@ -355,6 +361,11 @@ class Player:
         print("-" * 50 + "Смерть" + "-" * 50)
         print(f"{self.enemy.name} уничтожил вас")
         print("Игра окончена")
+
+        input("Нажмите enter чтобы закончить игру")
+
+    def victory(self):
+        print(f"Поздравляем! Вы прошли игру, победив {self.enemy.name}")
 
         input("Нажмите enter чтобы закончить игру")
 
@@ -424,9 +435,10 @@ def bar_level(level: int) -> str:
 
 
 def bar_xp(xp: int, max_xp: int) -> str:
-    k = round((xp / max_xp) * 10)
-    s = "=" * k + "-" * (10 - k)
+    k = round((xp / max_xp) * 20)
+    s = "=" * k + "-" * (20 - k)
     return "|" + s + "|"
+
 
 
 player = Player()
