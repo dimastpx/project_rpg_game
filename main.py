@@ -55,8 +55,9 @@ class Player:
         print("="*100)
 
         location = choice(Location)
-        location_type = choice(("нашли сундук", "встретили врага", "встретили врага", "встретили врага",
-                       "увидели, что всё спокойно"))
+        location_type = choice(("нашли сундук", "нашли сундук",
+                                "встретили врага", "встретили врага", "встретили врага",
+                                "увидели, что всё спокойно", "увидели, что всё спокойно"))
         print(f"Вы случайно забрели в {location} и {location_type}")
 
         match location_type:
@@ -65,11 +66,11 @@ class Player:
                 print("Случайный сундук перед вами")
 
                 if self.level < 2:
-                    count = randint(1, 2)
-                elif self.level < 4:
                     count = randint(2, 3)
-                else:
+                elif self.level < 4:
                     count = randint(3, 4)
+                else:
+                    count = 4
 
                 loot = []
 
@@ -116,8 +117,13 @@ class Player:
 
             case "увидели, что всё спокойно":
                 print()
-                print("Вы отдохнули и восстановили здоровье")
-                self.health = self.max_health
+
+                if self.health < self.max_health:
+                    self.health = self.max_health
+                    print("Вы отдохнули и восстановили здоровье")
+                else:
+                    print("Вы отдохнули")
+
                 input("Нажмите enter чтобы продолжить")
 
                 self.walk()
@@ -184,9 +190,16 @@ class Player:
             print("-" * 50 + "Победа" + "-" * 50)
             print("Вы победили!")
 
+            self.health += 30
+            if self.health <= self.max_health:
+                print("Вы восстановили 30 здоровья")
+            else:
+                print("Вы восстановили здоровье до предела")
+                self.health = self.max_health
+
             self.xp += enemy.xp
             max_xp = self.level * 100
-            print(f"Опыт +{self.xp}")
+            print(f"Опыт +{enemy.xp}")
 
             if self.xp > max_xp:
                 self.xp = 0
@@ -231,6 +244,7 @@ class Player:
                 else:
                     is_werewolf = "Оборотень" in self.effects
                     item = self.items[player_choice - 1]
+                    print()
 
                     match item:
                         case "Граната"| "Динамит"| "Зелье урона":
@@ -243,10 +257,11 @@ class Player:
 
                         case "Лекарства":
                             if is_werewolf:
-                                print(f"Оборотням нельзя питаться человеческими лекарствами")
+                                print(f"Оборотням нельзя питаться человеческими лекарствами, вы теряете их")
                             else:
                                 print("Вы подлечились")
                                 self.health += 20
+                            self.items.remove(item)
 
                         case "Лечебное зелье":
                             if is_werewolf:
@@ -254,6 +269,7 @@ class Player:
                             else:
                                 print("Вы подлечились")
                                 self.health += 50
+                            self.items.remove(item)
 
                         case "Мясо":
                             self.temp_effects.append("Мясо")
@@ -277,6 +293,7 @@ class Player:
                             else:
                                 self.armor += 5
                                 print("Вы прибавили 5% к своей защите")
+                            self.items.remove(item)
         print()
         print()
         self.battle()
@@ -286,8 +303,8 @@ class Player:
         print("-" * 50 + "Уворот" + "-" * 50)
         chance = randint(0, 100)
         if chance < self.avoidance:
-            print("Вы успешно увернулись от атаки и восстановили 10 здоровья")
-            self.health += 10
+            print("Вы успешно увернулись от атаки и восстановили 20 здоровья")
+            self.health += 20
             self.battle()
         else:
             print("Вы не смогли увернуться от атаки")
@@ -328,8 +345,8 @@ class Player:
                     descriptions.append("+30 Зелье урона")
                     damage += 30
         if "Волк" in enemy.effects and "Оборотень" in self.effects:
-            damage -= 10
-            descriptions.append("-10 Враг-волк (вы оборотень)")
+            damage -= 20
+            descriptions.append("-20 Враг-волк (вы оборотень)")
 
 
         return damage, descriptions
@@ -349,14 +366,14 @@ class Enemy:
         self.name = name
         match name:
             case "Староста Давид":
-                self.health = 400
+                self.health = 5
                 self.damage = 100
-                self.armor = 50
+                self.armor = 99
                 self.xp = 0
                 self.effects = []
             case "Гоблин"| "Дикий кабан"| "Скелет"| "Зомби"| "Бандит":
                 self.health = randint(80, 120)
-                self.damage = randint(30, 60)
+                self.damage = randint(20, 40)
                 self.armor = randint(0, 10)
                 self.xp = 40
                 self.effects = []
@@ -370,10 +387,10 @@ class Enemy:
                 self.health = 50
                 self.damage = 20
                 self.armor = 0
-                self.xp = 10
+                self.xp = 20
                 self.effects = ["Волк"]
             case "Фенрир":
-                self.health = 800
+                self.health = 500
                 self.damage = 200
                 self.armor = 0
                 self.xp = 0
