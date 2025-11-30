@@ -18,7 +18,6 @@ ENEMIES_4_LVL = ("Колдун", "Адская гончая")
 ENEMIES_5_LVL = ("Староста Давид", "Фенрир")
 
 
-
 class Player:
     def __init__(self):
         self.enemy = None
@@ -145,7 +144,7 @@ class Player:
         print(f"Защита: {self.enemy.armor}%")
         print("-"*10)
         print("|" + self.name + "|")
-        print(f"Ваше здоровье: {self.health}")
+        print(f"Ваше здоровье: {self.health}  {bar(self.health, self.max_health, 20)}")
         print(f"Ваша атака: {self.get_damage(self.enemy)[0]}")
 
         damage = self.get_damage(self.enemy)[1]
@@ -155,8 +154,8 @@ class Player:
         print(f"Ваша защита: {self.armor}%")
         print(f"Шанс уклонения: {self.avoidance}")
         print()
-        print(f"Ваш уровень: {self.level}  {bar_level(self.level)}")
-        print(f"Ваш опыт: {self.xp} {bar_xp(self.xp, self.level * 100)}")
+        print(f"Ваш уровень: {self.level}  {bar(self.level, 5, 5)}")
+        print(f"Ваш опыт: {self.xp}  {bar(self.xp, self.level * 100, 20)}")
 
 
 
@@ -425,27 +424,15 @@ class Enemy:
                 self.xp = 150
                 self.effects = []
 
-def bar_level(level: int) -> str:
-    match level:
-        case 1:
-            return "|=----|"
-        case 2:
-            return "|==---|"
-        case 3:
-            return "|===--|"
-        case 4:
-            return "|====-|"
-        case 5:
-            return "|=====|"
-    return ""
 
-
-def bar_xp(xp: int, max_xp: int) -> str:
-    k = round((xp / max_xp) * 20)
-    s = "=" * k + "-" * (20 - k)
+def bar(xp: int, max_xp: int, length: int) -> str:
+    k = round((xp / max_xp) * length)
+    s = "=" * k + "-" * (length - k)
     return "|" + s + "|"
 
 
 
+
+print("Very good RPG game")
 player = Player()
 
