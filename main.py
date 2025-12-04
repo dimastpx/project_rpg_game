@@ -24,7 +24,7 @@ class Player:
         self.name = input("Введите ваше имя: ").capitalize()
         player_choice = False
         self.xp = 0
-        self.level = 5
+        self.level = 1
 
         self.items = ["Граната"] # Предметы
         self.effects = [] # Эффекты
