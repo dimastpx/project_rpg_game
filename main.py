@@ -20,6 +20,8 @@ ENEMIES_5_LVL = ("Староста Давид", "Фенрир")
 
 class Player:
     def __init__(self):
+        print("Very good RPG game")
+
         self.enemy = None
         self.name = input("Введите ваше имя: ").capitalize()
         player_choice = False
@@ -139,7 +141,7 @@ class Player:
         print("-" * 50 + "Враг" + "-" * 50)
 
         print("|" + self.enemy.name + "|")
-        print(f"Здоровье: {self.enemy.health}")
+        print(f"Здоровье: {self.enemy.health}  {bar(self.enemy.health, self.enemy.mx_health, 20)}")
         print(f"Атака:  {self.enemy.damage}")
         print(f"Защита: {self.enemy.armor}%")
         print("-"*10)
@@ -422,7 +424,8 @@ class Enemy:
                 self.damage = 70
                 self.armor = 5
                 self.xp = 150
-                self.effects = []
+                self.effects = ["Волк"]
+        self.mx_health = self.health
 
 
 def bar(xp: int, max_xp: int, length: int) -> str:
@@ -433,6 +436,6 @@ def bar(xp: int, max_xp: int, length: int) -> str:
 
 
 
-print("Very good RPG game")
+
 player = Player()
 
